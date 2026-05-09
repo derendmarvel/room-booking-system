@@ -13,8 +13,8 @@ class Room extends Model
         'capacity',
     ];
 
-    public function bookings()
+    public function roomBookings()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(RoomBooking::class);
     }
 }

@@ -8,58 +8,73 @@ use Illuminate\Http\Request;
 class EquipmentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
+     * Show create form.
      */
     public function create()
     {
-        //
+        return view('admin.equipments.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store new equipment.
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'stock' => 'required|integer|min:0',
+            'category' => 'required|in:audio,video,accessory,computer,networking',
+        ]);
+
+        Equipment::create($validated);
+
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'Equipment created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Display single equipment.
      */
     public function show(Equipment $equipment)
     {
-        //
+        return view('equipments.show', compact('equipment'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show edit form.
      */
     public function edit(Equipment $equipment)
     {
-        //
+        return view('admin.equipments.edit', compact('equipment'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update equipment.
      */
     public function update(Request $request, Equipment $equipment)
     {
-        //
+        $validated = $request->validate([
+            'code' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'stock' => 'required|integer|min:0',
+            'category' => 'required|in:audio,video,accessory,computer,networking',
+        ]);
+
+        $equipment->update($validated);
+
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'Equipment updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete equipment.
      */
     public function destroy(Equipment $equipment)
     {
-        //
+        $equipment->delete();
+
+        return redirect()->route('admin.dashboard')
+                         ->with('success', 'Equipment deleted successfully.');
     }
 }

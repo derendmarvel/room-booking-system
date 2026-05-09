@@ -4,13 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\RoomBooking;
+use App\Models\Equipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class RoomBookingController extends Controller
 {
     public function index()
     {
+        // Auto complete expired bookings
+        RoomBooking::where('status', 'approved')
+            ->where(function ($query) {
+
+                $query->where('usage_date', '<', now()->toDateString())
+
+                    ->orWhere(function ($q) {
+
+                        $q->where('usage_date', now()->toDateString())
+                        ->where('end_time', '<', now()->format('H:i:s'));
+                    });
+            })
+            ->update([
+                'status' => 'completed'
+            ]);
+
         $bookings = RoomBooking::where('user_id', auth()->id())
             ->with('room')
             ->latest()
@@ -21,22 +39,74 @@ class RoomBookingController extends Controller
 
     public function adminDashboard()
     {
-        $bookings = RoomBooking::with(['user', 'room'])->get();
-        $rooms = Room::all();
+        // Auto complete expired bookings
+        RoomBooking::where('status', 'approved')
+            ->where(function ($query) {
 
-        return view('admin.dashboard', compact('bookings', 'rooms'));
+                $query->where('usage_date', '<', now()->toDateString())
+
+                    ->orWhere(function ($q) {
+
+                        $q->where('usage_date', now()->toDateString())
+                        ->where('end_time', '<', now()->format('H:i:s'));
+                    });
+            })
+            ->update([
+                'status' => 'completed'
+            ]);
+
+        $bookings = RoomBooking::all();
+        $rooms = Room::all();
+        $equipment = Equipment::all();
+
+        return view('admin.dashboard', compact(
+            'bookings',
+            'rooms',
+            'equipment'
+        ));
     }
 
     public function create(Request $request)
     {
         $room = Room::findOrFail($request->room_id);
 
-        $bookedDates = RoomBooking::where('room_id', $room->id)
-            ->where('status', 'approved')
-            ->pluck('usage_date')
-            ->toArray();
+        // GET ALL EQUIPMENT
+        $equipments = Equipment::all();
 
-        return view('room-booking-form', compact('room', 'bookedDates'));
+        $bookings = RoomBooking::where('room_id', $room->id)
+            ->whereIn('status', ['approved', 'completed'])
+            ->get();
+
+        $calendarBookings = [];
+
+        foreach ($bookings as $booking) {
+
+            $calendarBookings[] = [
+                'title' => strtoupper($booking->status),
+
+                'start' => $booking->usage_date . 'T' . $booking->start_time,
+
+                'end' => $booking->usage_date . 'T' . $booking->end_time,
+
+                'backgroundColor' => $booking->status === 'approved'
+                    ? '#dc2626'
+                    : '#6b7280',
+
+                'borderColor' => $booking->status === 'approved'
+                    ? '#dc2626'
+                    : '#6b7280',
+
+                'editable' => false,
+
+                'locked' => true
+            ];
+        }
+
+        return view('room-booking-form', compact(
+            'room',
+            'calendarBookings',
+            'equipments'
+        ));
     }
 
     public function store(Request $request)
@@ -80,5 +150,29 @@ class RoomBookingController extends Controller
         return redirect()
             ->route('dashboard')
             ->with('success', 'Booking request submitted successfully.');
+    }
+
+    public function approve($id)
+    {
+        $booking = RoomBooking::findOrFail($id);
+
+        $booking->status = 'approved';
+
+        $booking->save();
+
+        return redirect()->back()
+                        ->with('success', 'Booking approved successfully.');
+    }
+
+    public function reject($id)
+    {
+        $booking = RoomBooking::findOrFail($id);
+
+        $booking->status = 'rejected';
+
+        $booking->save();
+
+        return redirect()->back()
+                        ->with('success', 'Booking rejected successfully.');
     }
 }

@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('equipment', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
+            $table->string('name');
+            $table->integer('stock');
+            $table->enum('category', [
+                'audio',
+                'video',
+                'accessory',
+                'computer',
+                'networking'
+            ]);
             $table->timestamps();
         });
     }
