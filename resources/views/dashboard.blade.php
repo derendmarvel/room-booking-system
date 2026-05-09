@@ -21,6 +21,7 @@
                             Room Booking
                         </a>
                     </div>
+                    {{ $bookings->links() }}
                     @if($bookings->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="w-full border-collapse">

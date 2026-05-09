@@ -18,9 +18,9 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'regex:/^[0-9]+$/', 'min:9', 'max:13'],
+            'phone_number' => ['sometimes', 'regex:/^[0-9]+$/', 'min:9', 'max:13'],
             'identity_number' => [
-                'required',
+                'sometimes',
                 'string',
                 'max:14',
                 'unique:users'

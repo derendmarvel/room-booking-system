@@ -75,8 +75,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'phone_number' => 'nullable|string',
-            'identity_number' => 'nullable|string',
+            'phone_number' => 'sometimes|string',
+            'identity_number' => 'sometimes|string',
             'role' => 'required|in:mahasiswa,dosen',
         ]);
 

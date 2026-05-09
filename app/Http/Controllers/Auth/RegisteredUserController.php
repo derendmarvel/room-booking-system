@@ -32,9 +32,9 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'regex:/^[0-9]+$/', 'min:9', 'max:13'],
+            'phone_number' => ['sometimes', 'regex:/^[0-9]+$/', 'min:9', 'max:13'],
             'identity_number' => [
-                'required',
+                'sometimes',
                 'string',
                 'max:16',
                 'unique:users'
@@ -56,6 +56,8 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        $request->session()->regenerate();
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -115,5 +115,16 @@ class UserSeeder extends Seeder
                 'remember_token' => Str::random(10),
             ]);
         }
+
+        User::create([
+            'name' => 'Derend Marvel',
+            'phone_number' => '+6285785541218',
+            'identity_number'=> '0706012210030',
+            'email' => 'derend101@gmail.com',
+            'role'=> 'student',
+            'password' => Hash::make('derend123'),
+            'email_verified_at' => now(),
+            'remember_token' => Str::random(10),
+        ]);
     }
 }
