@@ -39,6 +39,43 @@
             <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
         </div>
 
+        <!-- NIM / NIK -->
+        <div class="mt-4">
+            <x-input-label for="identity_number" :value="__('NIM / NIK')" />
+
+            <x-text-input
+                id="identity_number"
+                class="block mt-1 w-full"
+                type="text"
+                name="identity_number"
+                :value="old('identity_number')"
+                placeholder="Enter NIM or NIK"
+                required
+            />
+
+            <x-input-error :messages="$errors->get('identity_number')" class="mt-2" />
+        </div>
+
+        <!-- Role -->
+        <div class="mt-4">
+            <x-input-label for="role" :value="__('Student or Lecturer')" />
+
+            <select
+                id="role"
+                name="role"
+                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                required
+            >
+                <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>
+                    Student
+                </option>
+                <option value="lecturer" {{ old('role') == 'lecturer' ? 'selected' : '' }}>
+                    Lecturer
+                </option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

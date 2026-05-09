@@ -23,6 +23,66 @@
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
+        <!-- Phone Number -->
+        <div class="mt-4">
+        <x-input-label for="phone_number" :value="__('Phone Number')" />
+            <div class="flex mt-1">
+                
+                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-white text-gray-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400">
+                    +62
+                </span>
+
+                <x-text-input
+                    id="phone_number"
+                    class="block w-full rounded-l-none"
+                    type="text"
+                    name="phone_number"
+                    :value="old('phone_number', ltrim(str_replace('+62', '', $user->phone_number), '0'))"
+                    required
+                />
+            </div>
+
+            <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
+        </div>
+
+        <!-- NIM / NIK -->
+        <div class="mt-4">
+            <x-input-label for="identity_number" :value="__('NIM / NIK')" />
+
+            <x-text-input
+                id="identity_number"
+                class="block mt-1 w-full"
+                type="text"
+                name="identity_number"
+                :value="old('identity_number', $user->identity_number)"
+                placeholder="Enter NIM or NIK"
+                required
+            />
+
+            <x-input-error :messages="$errors->get('identity_number')" class="mt-2" />
+        </div>
+
+        <!-- Role -->
+        <div class="mt-4">
+            <x-input-label for="role" :value="__('Student or Lecturer')" />
+
+            <select
+                id="role"
+                name="role"
+                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                required
+            >
+                <option value="student" {{ old('role', $user->role) == 'student' ? 'selected' : '' }}>
+                    Student
+                </option>
+
+                <option value="lecturer" {{ old('role', $user->role) == 'lecturer' ? 'selected' : '' }}>
+                    Lecturer
+                </option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
         <div>
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
