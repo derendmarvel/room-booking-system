@@ -29,6 +29,9 @@
                                             Time
                                         </th>
                                         <th class="text-left py-3">
+                                            Equipments
+                                        </th>
+                                        <th class="text-left py-3">
                                             Status
                                         </th>
                                         <th class="text-left py-3">
@@ -53,6 +56,24 @@
                                                 {{ $booking->start_time }}
                                                 -
                                                 {{ $booking->end_time }}
+                                            </td>
+                                            <td class="py-3">
+                                                @if($booking->equipmentBookings->count() > 0)
+
+                                                    <div class="space-y-1">
+                                                        @foreach($booking->equipmentBookings as $item)
+                                                            <div class="text-sm">
+                                                                • {{ $item->equipment->name }}
+                                                                (x{{ $item->quantity }})
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                @else
+                                                    <span class="text-gray-400">
+                                                        None
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td class="py-3">
                                                 @if($booking->status == 'pending')

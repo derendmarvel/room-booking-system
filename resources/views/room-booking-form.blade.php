@@ -49,6 +49,7 @@
 
                     <input type="date"
                         id="calendar_date"
+                        min="{{ now()->toDateString() }}"
                         class="mt-1 block w-64 rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                 </div>
 
@@ -149,6 +150,10 @@
             let calendar = new FullCalendar.Calendar(calendarEl, {
 
                 initialView: 'timeGridWeek',
+
+                validRange: {
+                    start: new Date().toISOString().split('T')[0]
+                },
 
                 height: 'auto',
 
@@ -281,7 +286,7 @@
                 row.className = 'equipment-row grid grid-cols-12 gap-3';
 
                 row.innerHTML = `
-                    <div class="col-span-7">
+                    <div class="col-span-10">
                         <select name="equipments[${equipmentIndex}][equipment_id]"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
 
@@ -299,7 +304,7 @@
                         </select>
                     </div>
 
-                    <div class="col-span-3">
+                    <div class="col-span-1">
                         <input type="number"
                             name="equipments[${equipmentIndex}][quantity]"
                             min="1"
@@ -307,7 +312,7 @@
                             class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                     </div>
 
-                    <div class="col-span-2 flex items-end justify-end">
+                    <div class="col-span-1 flex items-end justify-end">
                         <button type="button"
                             class="remove-equipment w-10 h-10 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow">
                             x

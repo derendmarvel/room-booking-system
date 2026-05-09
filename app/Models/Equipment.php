@@ -13,8 +13,8 @@ class Equipment extends Model
         'category',
     ];
 
-    public function equipmentBookings()
+   public function equipmentBookings()
     {
-        return $this->hasMany(equipmentBooking::class);
+        return $this->hasMany(EquipmentBooking::class);
     }
 }

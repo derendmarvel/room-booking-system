@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\RoomBooking;
+use App\Models\EquipmentBooking;
 use App\Models\Equipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class RoomBookingController extends Controller
@@ -30,7 +32,7 @@ class RoomBookingController extends Controller
             ]);
 
         $bookings = RoomBooking::where('user_id', auth()->id())
-            ->with('room')
+            ->with(['room', 'equipmentBookings.equipment'])
             ->latest()
             ->get();
 
@@ -55,7 +57,9 @@ class RoomBookingController extends Controller
                 'status' => 'completed'
             ]);
 
-        $bookings = RoomBooking::all();
+        $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment'])
+            ->latest()
+            ->get();
         $rooms = Room::all();
         $equipment = Equipment::all();
 
@@ -113,10 +117,15 @@ class RoomBookingController extends Controller
     {
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
-            'usage_date' => 'required|date',
+            'usage_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'purpose' => 'required|string',
+
+            // equipment validation
+            'equipments' => 'required|array|min:1',
+            'equipments.*.equipment_id' => 'required|exists:equipment,id',
+            'equipments.*.quantity' => 'required|integer|min:1',
         ]);
 
         // Check room conflict
@@ -124,7 +133,6 @@ class RoomBookingController extends Controller
             ->where('usage_date', $request->usage_date)
             ->where('status', 'approved')
             ->where(function ($query) use ($request) {
-
                 $query->where('start_time', '<', $request->end_time)
                     ->where('end_time', '>', $request->start_time);
             })
@@ -136,16 +144,36 @@ class RoomBookingController extends Controller
             ])->withInput();
         }
 
-        RoomBooking::create([
-            'user_id' => Auth::id(),
-            'room_id' => $request->room_id,
-            'booking_date' => now(),
-            'usage_date' => $request->usage_date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'status' => 'pending',
-            'purpose' => $request->purpose,
-        ]);
+        DB::transaction(function () use ($request) {
+
+            // 1. Create Room Booking
+            $roomBooking = RoomBooking::create([
+                'user_id' => auth()->id(),
+                'room_id' => $request->room_id,
+                'booking_date' => now(),
+                'usage_date' => $request->usage_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'status' => 'pending',
+                'purpose' => $request->purpose,
+            ]);
+
+            // 2. Create Equipment Bookings (weak entity)
+            foreach ($request->equipments as $item) {
+                if (!empty($item['equipment_id'])) {
+
+                    EquipmentBooking::updateOrCreate(
+                        [
+                            'room_booking_id' => $roomBooking->id,
+                            'equipment_id' => $item['equipment_id'],
+                        ],
+                        [
+                            'quantity' => $item['quantity'],
+                        ]
+                    );
+                }
+            }
+        });
 
         return redirect()
             ->route('dashboard')
