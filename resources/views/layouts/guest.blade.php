@@ -15,9 +15,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center py-12  bg-gray-100 dark:bg-gray-900">
             <div>
-                <a class = "font-bold text-white text-2xl" href="/">
+                <a class = "font-bold text-white text-2xl mt-8" href="/">
                    @yield('title')
                 </a>
             </div>
