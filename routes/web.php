@@ -65,14 +65,14 @@ Route::middleware(['auth', 'admin'])
         Route::get('/dashboard', [RoomBookingController::class, 'adminDashboard'])
             ->name('dashboard');
 
-        // USERS (CRUD automatically)
+        // USERS (CRUD)
         Route::resource('users', UserController::class);
 
-        // ROOMS (CRUD simplified)
+        // ROOMS (CRUD)
         Route::resource('rooms', RoomController::class)
             ->except(['show']);
 
-        // EQUIPMENT (CRUD simplified)
+        // EQUIPMENT (CRUD)
         Route::resource('equipments', EquipmentController::class)
             ->except(['show']);
 
@@ -82,6 +82,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::put('/bookings/{id}/reject', [RoomBookingController::class, 'reject'])
             ->name('bookings.reject');
+
+        Route::get('/bookings/export/pdf', [RoomBookingController::class, 'exportPdf'])
+            ->name('bookings.export.pdf');
     });
 
 require __DIR__.'/auth.php';

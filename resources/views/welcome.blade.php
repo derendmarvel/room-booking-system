@@ -47,9 +47,17 @@
                         </li>
                     </ul>
                     <div class="flex gap-3 text-sm leading-normal mt-4">
+                    @auth
+                        <a 
+                            href="{{ route('dashboard') }}" 
+                            class="inline-block px-5 py-1.5 bg-blue-600 text-white border border-black rounded-sm text-sm leading-normal hover:bg-black hover:border-black dark:bg-blue-600 dark:text-[#eeeeec] dark:hover:bg-blue-700 dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
+                        >
+                            Dashboard
+                        </a>
+                    @else
                         <a 
                             href="{{ route('login') }}" 
-                            class="inline-block px-5 py-1.5 bg-blue-600 text-white border border-black rounded-sm text-sm leading-normal hover:bg-black hover:border-black dark:bg-blue-600  dark:text-[#eeeeec] dark:hover:bg-blue-700 dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
+                            class="inline-block px-5 py-1.5 bg-blue-600 text-white border border-black rounded-sm text-sm leading-normal hover:bg-black hover:border-black dark:bg-blue-600 dark:text-[#eeeeec] dark:hover:bg-blue-700 dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
                         >
                             Login
                         </a>
@@ -60,7 +68,8 @@
                         >
                             Register
                         </a>
-                    </div>
+                    @endauth
+                </div>
                 </div>
                 <div class="bg-[#fff2f2] dark:bg-[#1D0002] relative lg:-ml-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-r-lg aspect-[335/364] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden">
                     <img src="{{ asset('images/room.jpg') }}" alt="room">

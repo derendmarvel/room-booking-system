@@ -203,6 +203,21 @@
                 });
             });
         }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.name.includes('equipment_id')) {
+
+                const row = e.target.closest('.equipment-row');
+                const qty = row.querySelector('input[name*="[quantity]"]');
+
+                if (!e.target.value) {
+                    qty.value = '';
+                    qty.disabled = true;
+                } else {
+                    qty.disabled = false;
+                }
+            }
+        });
     </script>
 
     <script>

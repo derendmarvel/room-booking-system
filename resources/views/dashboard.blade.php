@@ -11,9 +11,16 @@
             <!-- Booking List -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h3 class="text-2xl font-bold mb-4">
-                        My Bookings
-                    </h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-2xl font-bold">
+                            My Bookings
+                        </h3>
+
+                        <a href="{{ route('room.view') }}"
+                        class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow">
+                            Room Booking
+                        </a>
+                    </div>
                     @if($bookings->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="w-full border-collapse">
@@ -108,14 +115,6 @@
                         </p>
                     @endif
                 </div>
-            </div>
-
-            <!-- Room Booking Button -->
-            <div>
-                <a href="{{ route('room.view') }}"
-                   class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
-                    Room Booking
-                </a>
             </div>
         </div>
     </div>

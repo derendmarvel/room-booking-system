@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RoomBookingController extends Controller
 {
@@ -35,7 +36,7 @@ class RoomBookingController extends Controller
         $bookings = RoomBooking::where('user_id', auth()->id())
             ->with(['room', 'equipmentBookings.equipment'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('dashboard', compact('bookings'));
     }
@@ -59,11 +60,18 @@ class RoomBookingController extends Controller
             ]);
 
         $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
-            ->latest()
-            ->get();
-        $rooms = Room::all();
-        $equipment = Equipment::all();
-        $users = User::where('role', '!=', 'admin')->get();
+            ->orderBy('usage_date', 'desc')
+            ->orderBy('start_time', 'desc')
+            ->paginate(10, ['*'], 'bookings_page');
+
+        $users = User::where('role', '!=', 'admin')
+            ->paginate(10, ['*'], 'users_page');
+
+        $rooms = Room::latest()
+            ->paginate(10, ['*'], 'rooms_page');
+
+        $equipment = Equipment::latest()
+            ->paginate(10, ['*'], 'equipment_page');
 
         return view('admin.dashboard', compact(
             'bookings',
@@ -122,6 +130,7 @@ class RoomBookingController extends Controller
 
     public function store(Request $request)
     {
+        // Input data validation
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'usage_date' => 'required|date|after_or_equal:today',
@@ -129,12 +138,12 @@ class RoomBookingController extends Controller
             'end_time' => 'required|after:start_time',
             'purpose' => 'required|string',
 
-            'equipments' => 'required|array|min:1',
-            'equipments.*.equipment_id' => 'required|exists:equipment,id',
-            'equipments.*.quantity' => 'required|integer|min:1',
+            'equipments' => 'nullable|array',
+            'equipments.*.equipment_id' => 'nullable|exists:equipment,id',
+            'equipments.*.quantity' => 'nullable|integer|min:1',
         ]);
 
-        // 1. Room conflict check
+        // Room conflict check
         $conflict = RoomBooking::where('room_id', $request->room_id)
             ->where('usage_date', $request->usage_date)
             ->where('status', 'approved')
@@ -150,39 +159,20 @@ class RoomBookingController extends Controller
             ])->withInput();
         }
 
-        // 2. EQUIPMENT AVAILABILITY CHECK (NEW LOGIC)
-        foreach ($request->equipments as $item) {
-
-            if (empty($item['equipment_id'])) continue;
-
-            $equipmentId = $item['equipment_id'];
-            $qtyRequested = $item['quantity'];
-
-            $equipment = Equipment::find($equipmentId);
-
-            // sum overlapping approved bookings
-            $usedQuantity = EquipmentBooking::where('equipment_id', $equipmentId)
-                ->whereHas('roomBooking', function ($q) use ($request) {
-                    $q->where('usage_date', $request->usage_date)
-                    ->where('status', 'approved')
-                    ->where(function ($q2) use ($request) {
-                        $q2->where('start_time', '<', $request->end_time)
-                            ->where('end_time', '>', $request->start_time);
-                    });
-                })
-                ->sum('quantity');
-
-            $available = $equipment->stock - $usedQuantity;
-
-            if ($qtyRequested > $available) {
-                return back()->withErrors([
-                    'equipments' => $equipment->name .
-                        " only has {$available} available for this time slot."
-                ])->withInput();
+        // Equipment Availability check
+        foreach ($request->equipments ?? [] as $item) {
+            if (empty($item['equipment_id'])) {
+                continue; // skip empty rows
             }
+
+            EquipmentBooking::create([
+                'room_booking_id' => $roomBooking->id,
+                'equipment_id' => $item['equipment_id'],
+                'quantity' => $item['quantity'] ?? 1,
+            ]);
         }
 
-        // 3. Save booking safely
+        // Save booking safely
         DB::transaction(function () use ($request) {
 
             $roomBooking = RoomBooking::create([
@@ -236,5 +226,16 @@ class RoomBookingController extends Controller
         $booking->save();
 
         return back()->with('success', 'Booking rejected successfully.');
+    }
+
+    public function exportPdf()
+    {
+        $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
+            ->latest()
+            ->get();
+
+        $pdf = Pdf::loadView('admin.exports.bookings-pdf', compact('bookings'));
+
+        return $pdf->download('bookings-report.pdf');
     }
 }

@@ -14,6 +14,13 @@
                     <h3 class="text-2xl font-bold mb-4">
                         All Bookings
                     </h3>
+                    <a href="{{ route('admin.bookings.export.pdf') }}"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg mb-4 inline-block">
+                        Export PDF
+                    </a>
+                    <div class="my-2">
+                        {{ $bookings->links('pagination::tailwind', ['pageName' => 'bookings_page']) }}
+                    </div>
                     @if($bookings->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="w-full border-collapse">
@@ -40,7 +47,6 @@
                                         <th class="text-left py-3">
                                             User
                                         </th>
-
                                         <th class="text-left py-3">
                                             Role
                                         </th>
@@ -179,6 +185,10 @@
                         </a>
                     </div>
 
+                    <div class="my-2">
+                        {{ $users->links('pagination::tailwind', ['pageName' => 'users_page']) }}
+                    </div>
+
                     @if($users->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="w-full border-collapse">
@@ -274,6 +284,10 @@
                         class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
                             Add Room
                         </a>
+                    </div>
+
+                    <div class="my-2">
+                        {{ $rooms->links('pagination::tailwind', ['pageName' => 'rooms_page']) }}
                     </div>
 
                     @if($rooms->count() > 0)
@@ -375,6 +389,10 @@
                         class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
                             Add Equipment
                         </a>
+                    </div>
+
+                    <div class="my-2">
+                        {{ $equipment->links('pagination::tailwind', ['pageName' => 'equipment_page']) }}
                     </div>
 
                     @if($equipment->count() > 0)
