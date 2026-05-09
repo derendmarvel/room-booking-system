@@ -140,6 +140,72 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 
     <script>
+        const equipmentBookings = @json($equipmentBookings);
+        const equipments = @json($equipments);
+
+        function isOverlapping(startA, endA, startB, endB) {
+            return startA < endB && endA > startB;
+        }
+        function calculateAvailableStock(equipmentId, date, startTime, endTime) {
+            let used = 0;
+
+            const selectedStart = new Date(date + 'T' + startTime);
+            const selectedEnd = new Date(date + 'T' + endTime);
+
+            equipmentBookings.forEach(booking => {
+
+                if (booking.status !== 'approved') return;
+
+                booking.equipment_bookings.forEach(item => {
+
+                    if (item.equipment_id != equipmentId) return;
+
+                    const bStart = new Date(booking.usage_date + 'T' + booking.start_time);
+                    const bEnd = new Date(booking.usage_date + 'T' + booking.end_time);
+
+                    if (isOverlapping(selectedStart, selectedEnd, bStart, bEnd)) {
+                        used += item.quantity;
+                    }
+                });
+            });
+
+            const equipment = equipments.find(e => e.id == equipmentId);
+
+            return equipment.stock - used;
+        }
+
+        function updateEquipmentDropdown() {
+            const date = document.getElementById('usage_date').value;
+            const start = document.getElementById('start_time').value;
+            const end = document.getElementById('end_time').value;
+
+            if (!date || !start || !end) return;
+
+            document.querySelectorAll('select[name*="equipment_id"]').forEach(select => {
+
+                const selectedId = select.value;
+
+                Array.from(select.options).forEach(option => {
+
+                    if (!option.value) return;
+
+                    const available = calculateAvailableStock(option.value, date, start, end);
+
+                    const original = equipments.find(e => e.id == option.value);
+
+                    option.text = `${original.name} (Available: ${available})`;
+
+                    if (available <= 0) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+            });
+        }
+    </script>
+
+    <script>
 
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -254,18 +320,15 @@
                 });
 
             function updateInputs(start, end) {
-
                 let date = start.toISOString().split('T')[0];
-
                 let startTime = start.toTimeString().slice(0,5);
-
                 let endTime = end.toTimeString().slice(0,5);
 
                 document.getElementById('usage_date').value = date;
-
                 document.getElementById('start_time').value = startTime;
-
                 document.getElementById('end_time').value = endTime;
+
+                updateEquipmentDropdown();
             }
 
         });

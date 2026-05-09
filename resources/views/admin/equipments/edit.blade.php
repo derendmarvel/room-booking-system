@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <form action="{{ route('equipments.update', $equipment->id) }}"
+        <form action="{{ route('admin.equipments.update', $equipment->id) }}"
               method="POST"
               class="space-y-5">
 

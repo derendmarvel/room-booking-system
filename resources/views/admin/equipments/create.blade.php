@@ -23,7 +23,7 @@
             </div>
         @endif
 
-        <form action="{{ route('equipments.store') }}"
+        <form action="{{ route('admin.equipments.store') }}"
               method="POST"
               class="space-y-5">
 

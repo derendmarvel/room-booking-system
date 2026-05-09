@@ -37,6 +37,13 @@
                                         <th class="text-left py-3">
                                             Purpose
                                         </th>
+                                        <th class="text-left py-3">
+                                            User
+                                        </th>
+
+                                        <th class="text-left py-3">
+                                            Role
+                                        </th>
                                         <th class="text-right py-3">
                                             Actions
                                         </th>
@@ -101,6 +108,13 @@
                                                 {{ $booking->purpose }}
                                             </td>
                                             <td class="py-3">
+                                                {{ $booking->user->name }}
+                                            </td>
+
+                                            <td class="py-3 capitalize">
+                                                {{ $booking->user->role }}
+                                            </td>
+                                            <td class="py-3">
                                                 <div class="flex justify-end gap-2">
 
                                                     {{-- Approve Button --}}
@@ -150,6 +164,103 @@
                 </div>
             </div>
 
+            <!-- Users List -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-2xl font-bold">
+                            All Users
+                        </h3>
+
+                        <a href="{{ route('admin.users.create') }}"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
+                            Add User
+                        </a>
+                    </div>
+
+                    @if($users->count() > 0)
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse">
+
+                                <thead>
+                                    <tr class="border-b border-gray-300 dark:border-gray-700">
+
+                                        <th class="text-left py-3">
+                                            Name
+                                        </th>
+
+                                        <th class="text-left py-3">
+                                            Email
+                                        </th>
+
+                                        <th class="text-left py-3">
+                                            Role
+                                        </th>
+
+                                        <th class="text-right py-3">
+                                            Actions
+                                        </th>
+
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach($users as $user)
+                                        <tr class="border-b border-gray-200 dark:border-gray-700">
+
+                                            <td class="py-3">
+                                                {{ $user->name }}
+                                            </td>
+
+                                            <td class="py-3">
+                                                {{ $user->email }}
+                                            </td>
+
+                                            <td class="py-3 capitalize">
+                                                {{ $user->role }}
+                                            </td>
+
+                                            <td class="py-3">
+                                                <div class="flex justify-end gap-2">
+
+                                                    <!-- Edit -->
+                                                    <a href="{{ route('admin.users.edit', $user->id) }}"
+                                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-sm">
+                                                        Edit
+                                                    </a>
+
+                                                    <!-- Delete -->
+                                                    <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Delete this user?')">
+
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-sm">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </td>
+
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-gray-500 dark:text-gray-400">
+                            No users found.
+                        </p>
+                    @endif
+
+                </div>
+            </div>
+
             <!-- Rooms List -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
@@ -159,7 +270,7 @@
                             All Rooms
                         </h3>
 
-                        <a href=" {{ route('rooms.create') }}"
+                        <a href=" {{ route('admin.rooms.create') }}"
                         class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
                             Add Room
                         </a>
@@ -216,13 +327,13 @@
                                                 <div class="flex justify-end items-center gap-2">
 
                                                     <!-- Edit Button -->
-                                                    <a href="{{ route('rooms.edit', $room->id) }}"
+                                                    <a href="{{ route('admin.rooms.edit', $room->id) }}"
                                                     class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-sm">
                                                         Edit
                                                     </a>
 
                                                     <!-- Delete Button -->
-                                                    <form action="{{ route('rooms.destroy', $room->id) }}"
+                                                    <form action="{{ route('admin.rooms.destroy', $room->id) }}"
                                                         method="POST"
                                                         onsubmit="return confirm('Are you sure you want to delete this room?')">
 
@@ -260,7 +371,7 @@
                             All Equipment
                         </h3>
 
-                        <a href="{{ route('equipments.create') }}"
+                        <a href="{{ route('admin.equipments.create') }}"
                         class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg shadow">
                             Add Equipment
                         </a>
@@ -320,13 +431,13 @@
                                                 <div class="flex justify-end items-center gap-2">
 
                                                     <!-- Edit Button -->
-                                                    <a href="{{ route('equipments.edit', $item->id) }}"
+                                                    <a href="{{ route('admin.equipments.edit', $item->id) }}"
                                                     class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg text-sm">
                                                         Edit
                                                     </a>
 
                                                     <!-- Delete Button -->
-                                                    <form action="{{ route('equipments.destroy', $item->id) }}"
+                                                    <form action="{{ route('admin.equipments.destroy', $item->id) }}"
                                                         method="POST"
                                                         onsubmit="return confirm('Are you sure you want to delete this equipment?')">
 

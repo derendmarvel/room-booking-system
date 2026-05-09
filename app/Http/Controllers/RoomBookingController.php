@@ -6,6 +6,7 @@ use App\Models\Room;
 use App\Models\RoomBooking;
 use App\Models\EquipmentBooking;
 use App\Models\Equipment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -57,16 +58,18 @@ class RoomBookingController extends Controller
                 'status' => 'completed'
             ]);
 
-        $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment'])
+        $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
             ->latest()
             ->get();
         $rooms = Room::all();
         $equipment = Equipment::all();
+        $users = User::where('role', '!=', 'admin')->get();
 
         return view('admin.dashboard', compact(
             'bookings',
             'rooms',
-            'equipment'
+            'equipment',
+            'users'
         ));
     }
 
@@ -76,6 +79,9 @@ class RoomBookingController extends Controller
 
         // GET ALL EQUIPMENT
         $equipments = Equipment::all();
+        $equipmentBookings = RoomBooking::with('equipmentBookings')
+            ->whereIn('status', ['approved'])
+            ->get();
 
         $bookings = RoomBooking::where('room_id', $room->id)
             ->whereIn('status', ['approved', 'completed'])
@@ -109,7 +115,8 @@ class RoomBookingController extends Controller
         return view('room-booking-form', compact(
             'room',
             'calendarBookings',
-            'equipments'
+            'equipments',
+            'equipmentBookings'
         ));
     }
 
@@ -122,13 +129,12 @@ class RoomBookingController extends Controller
             'end_time' => 'required|after:start_time',
             'purpose' => 'required|string',
 
-            // equipment validation
             'equipments' => 'required|array|min:1',
             'equipments.*.equipment_id' => 'required|exists:equipment,id',
             'equipments.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Check room conflict
+        // 1. Room conflict check
         $conflict = RoomBooking::where('room_id', $request->room_id)
             ->where('usage_date', $request->usage_date)
             ->where('status', 'approved')
@@ -144,9 +150,41 @@ class RoomBookingController extends Controller
             ])->withInput();
         }
 
+        // 2. EQUIPMENT AVAILABILITY CHECK (NEW LOGIC)
+        foreach ($request->equipments as $item) {
+
+            if (empty($item['equipment_id'])) continue;
+
+            $equipmentId = $item['equipment_id'];
+            $qtyRequested = $item['quantity'];
+
+            $equipment = Equipment::find($equipmentId);
+
+            // sum overlapping approved bookings
+            $usedQuantity = EquipmentBooking::where('equipment_id', $equipmentId)
+                ->whereHas('roomBooking', function ($q) use ($request) {
+                    $q->where('usage_date', $request->usage_date)
+                    ->where('status', 'approved')
+                    ->where(function ($q2) use ($request) {
+                        $q2->where('start_time', '<', $request->end_time)
+                            ->where('end_time', '>', $request->start_time);
+                    });
+                })
+                ->sum('quantity');
+
+            $available = $equipment->stock - $usedQuantity;
+
+            if ($qtyRequested > $available) {
+                return back()->withErrors([
+                    'equipments' => $equipment->name .
+                        " only has {$available} available for this time slot."
+                ])->withInput();
+            }
+        }
+
+        // 3. Save booking safely
         DB::transaction(function () use ($request) {
 
-            // 1. Create Room Booking
             $roomBooking = RoomBooking::create([
                 'user_id' => auth()->id(),
                 'room_id' => $request->room_id,
@@ -158,8 +196,8 @@ class RoomBookingController extends Controller
                 'purpose' => $request->purpose,
             ]);
 
-            // 2. Create Equipment Bookings (weak entity)
             foreach ($request->equipments as $item) {
+
                 if (!empty($item['equipment_id'])) {
 
                     EquipmentBooking::updateOrCreate(
@@ -185,11 +223,9 @@ class RoomBookingController extends Controller
         $booking = RoomBooking::findOrFail($id);
 
         $booking->status = 'approved';
-
         $booking->save();
 
-        return redirect()->back()
-                        ->with('success', 'Booking approved successfully.');
+        return back()->with('success', 'Booking approved successfully.');
     }
 
     public function reject($id)
@@ -197,10 +233,8 @@ class RoomBookingController extends Controller
         $booking = RoomBooking::findOrFail($id);
 
         $booking->status = 'rejected';
-
         $booking->save();
 
-        return redirect()->back()
-                        ->with('success', 'Booking rejected successfully.');
+        return back()->with('success', 'Booking rejected successfully.');
     }
 }
