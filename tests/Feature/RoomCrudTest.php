@@ -22,17 +22,18 @@ class RoomCrudTest extends TestCase
     {
         $admin = $this->admin();
 
-        $response = $this->actingAs($admin)->post('/rooms', [
+        $response = $this->actingAs($admin)->post('/admin/rooms', [
             'name' => 'Room A',
-            'location' => 'Building 1',
+            'building' => 'Building 1',
             'capacity' => 30,
+            'floor' => 1,
         ]);
 
         $response->assertRedirect();
 
         $this->assertDatabaseHas('rooms', [
             'name' => 'Room A',
-            'location' => 'Building 1',
+            'building' => 'Building 1',
         ]);
     }
 
@@ -42,10 +43,11 @@ class RoomCrudTest extends TestCase
 
         $room = Room::factory()->create();
 
-        $response = $this->actingAs($admin)->put("/rooms/{$room->id}", [
+        $response = $this->actingAs($admin)->put("/admin/rooms/{$room->id}", [
             'name' => 'Updated Room',
-            'location' => 'Updated Location',
+            'building' => 'Updated Location',
             'capacity' => 50,
+            'floor' => 4
         ]);
 
         $response->assertRedirect();
@@ -62,7 +64,7 @@ class RoomCrudTest extends TestCase
 
         $room = Room::factory()->create();
 
-        $response = $this->actingAs($admin)->delete("/rooms/{$room->id}");
+        $response = $this->actingAs($admin)->delete("/admin/rooms/{$room->id}");
 
         $response->assertRedirect();
 
@@ -75,8 +77,8 @@ class RoomCrudTest extends TestCase
     {
         $room = Room::factory()->create();
 
-        $this->post('/rooms', [])->assertRedirect('/login');
-        $this->put("/rooms/{$room->id}", [])->assertRedirect('/login');
-        $this->delete("/rooms/{$room->id}")->assertRedirect('/login');
+        $this->post('/admin/rooms', [])->assertRedirect('/login');
+        $this->put("/admin/rooms/{$room->id}", [])->assertRedirect('/login');
+        $this->delete("/admin/rooms/{$room->id}")->assertRedirect('/login');
     }
 }

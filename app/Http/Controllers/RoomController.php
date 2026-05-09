@@ -12,8 +12,10 @@ class RoomController extends Controller
      */
     public function view()
     {
+        // Get all rooms
         $rooms = Room::all();
 
+        // Display all rooms
         return view('room-view', compact('rooms'));
     }
 
@@ -22,6 +24,7 @@ class RoomController extends Controller
      */
     public function create()
     {
+        // Display create room form
         return view('admin.rooms.create');
     }
 
@@ -30,6 +33,7 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate input data
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'building' => 'required|string|max:255',
@@ -37,8 +41,10 @@ class RoomController extends Controller
             'capacity' => 'required|integer',
         ]);
 
+        // Create data in database
         Room::create($validated);
 
+        // Display admin dashboard
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'Room created successfully.');
@@ -49,6 +55,7 @@ class RoomController extends Controller
      */
     public function edit(Room $room)
     {
+        // Display edit room form
         return view('admin.rooms.edit', compact('room'));
     }
 
@@ -57,6 +64,7 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
+        // Validate input data
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'building' => 'required|string|max:255',
@@ -64,8 +72,10 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1',
         ]);
 
+        // Update data into database
         $room->update($validated);
 
+        // Display admin dashboard
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'Room updated successfully.');
@@ -76,8 +86,10 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
+        // Delete room data from database
         $room->delete();
 
+        // Display admin dashboard
         return redirect()
             ->route('admin.dashboard')
             ->with('success', 'Room deleted successfully.');

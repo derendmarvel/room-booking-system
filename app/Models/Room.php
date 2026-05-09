@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Room extends Model
 {
+    // Room has a factory
     use HasFactory;
 
+    // Room Atrributes
     protected $fillable = [
         'name',
         'building',
@@ -16,6 +18,7 @@ class Room extends Model
         'capacity',
     ];
 
+    // Each room can be found in many roomBookings
     public function roomBookings()
     {
         return $this->hasMany(RoomBooking::class);

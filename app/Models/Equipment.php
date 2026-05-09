@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Equipment extends Model
 {
+    // Equipment has a factory
     use HasFactory;
 
+    // Attributes
     protected $fillable = [
         'code',
         'name',
@@ -16,7 +18,9 @@ class Equipment extends Model
         'category',
     ];
 
-   public function equipmentBookings()
+    
+    //Each equipment can be found in many equipmentBookings
+    public function equipmentBookings()
     {
         return $this->hasMany(EquipmentBooking::class);
     }

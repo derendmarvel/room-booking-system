@@ -15,16 +15,16 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class RoomBookingController extends Controller
 {
+    /**
+     * Display user dashboard
+     */
     public function index()
     {
         // Auto complete expired bookings
         RoomBooking::where('status', 'approved')
             ->where(function ($query) {
-
                 $query->where('usage_date', '<', now()->toDateString())
-
                     ->orWhere(function ($q) {
-
                         $q->where('usage_date', now()->toDateString())
                         ->where('end_time', '<', now()->format('H:i:s'));
                     });
@@ -33,24 +33,26 @@ class RoomBookingController extends Controller
                 'status' => 'completed'
             ]);
 
+        // Get user's bookings from database
         $bookings = RoomBooking::where('user_id', auth()->id())
             ->with(['room', 'equipmentBookings.equipment'])
             ->latest()
             ->paginate(10);
 
+        // Display user dashboard
         return view('dashboard', compact('bookings'));
     }
 
+    /**
+     * Display admin dashboard
+     */
     public function adminDashboard()
     {
         // Auto complete expired bookings
         RoomBooking::where('status', 'approved')
             ->where(function ($query) {
-
                 $query->where('usage_date', '<', now()->toDateString())
-
                     ->orWhere(function ($q) {
-
                         $q->where('usage_date', now()->toDateString())
                         ->where('end_time', '<', now()->format('H:i:s'));
                     });
@@ -59,20 +61,25 @@ class RoomBookingController extends Controller
                 'status' => 'completed'
             ]);
 
+        // Get all room bookings, ordered by date and time (descending)
         $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
             ->orderBy('usage_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->paginate(10, ['*'], 'bookings_page');
 
+        // Get all users
         $users = User::where('role', '!=', 'admin')
             ->paginate(10, ['*'], 'users_page');
 
+        // Get all rooms
         $rooms = Room::latest()
             ->paginate(10, ['*'], 'rooms_page');
 
+        // Get all equipments
         $equipment = Equipment::latest()
             ->paginate(10, ['*'], 'equipment_page');
 
+        // Display admin dashboard
         return view('admin.dashboard', compact(
             'bookings',
             'rooms',
@@ -81,45 +88,47 @@ class RoomBookingController extends Controller
         ));
     }
 
+    /**
+     * Show booking request form
+     */
     public function create(Request $request)
     {
+        // Get designated room
         $room = Room::findOrFail($request->room_id);
 
-        // GET ALL EQUIPMENT
+        // Get all equipments
         $equipments = Equipment::all();
+
+        // Get all equipment bookings
         $equipmentBookings = RoomBooking::with('equipmentBookings')
             ->whereIn('status', ['approved'])
             ->get();
 
+        // Get bookings that have been approved or completed to block out unavailable dates
         $bookings = RoomBooking::where('room_id', $room->id)
             ->whereIn('status', ['approved', 'completed'])
             ->get();
 
         $calendarBookings = [];
 
+        // Turn all bookings into blocks on a calendar
         foreach ($bookings as $booking) {
-
             $calendarBookings[] = [
                 'title' => strtoupper($booking->status),
-
                 'start' => $booking->usage_date . 'T' . $booking->start_time,
-
                 'end' => $booking->usage_date . 'T' . $booking->end_time,
-
                 'backgroundColor' => $booking->status === 'approved'
                     ? '#dc2626'
                     : '#6b7280',
-
                 'borderColor' => $booking->status === 'approved'
                     ? '#dc2626'
                     : '#6b7280',
-
                 'editable' => false,
-
                 'locked' => true
             ];
         }
 
+        // Display room booking form
         return view('room-booking-form', compact(
             'room',
             'calendarBookings',
@@ -128,8 +137,12 @@ class RoomBookingController extends Controller
         ));
     }
 
+    /**
+     * Store booking request
+     */
     public function store(Request $request)
     {
+        // Validate input data
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'usage_date' => 'required|date|after_or_equal:today',
@@ -141,7 +154,7 @@ class RoomBookingController extends Controller
             'equipments.*.quantity' => 'nullable|integer|min:1',
         ]);
 
-        // 1. Room conflict check
+        // Room conflict check
         $conflict = RoomBooking::where('room_id', $validated['room_id'])
             ->where('usage_date', $validated['usage_date'])
             ->where('status', 'approved')
@@ -157,7 +170,7 @@ class RoomBookingController extends Controller
             ]);
         }
 
-        // 2. Equipment Stock Validation Check
+        // Equipment Stock Validation Check
         foreach ($validated['equipments'] ?? [] as $index => $item) {
             if (!empty($item['equipment_id'])) {
                 $equipment = Equipment::find($item['equipment_id']);
@@ -170,7 +183,7 @@ class RoomBookingController extends Controller
             }
         }
 
-        // 3. Database Transaction
+        // Database Transaction
         DB::transaction(function () use ($validated) {
             $roomBooking = RoomBooking::create([
                 'user_id' => auth()->id(),
@@ -194,38 +207,56 @@ class RoomBookingController extends Controller
             }
         });
 
+        // Display user dashboard
         return redirect()->route('dashboard')
             ->with('success', 'Booking request submitted successfully.');
     }
 
+    /**
+     * Approve booking request
+     */
     public function approve($id)
     {
+        // Get designated booking
         $booking = RoomBooking::findOrFail($id);
 
+        // Change status to approved
         $booking->status = 'approved';
         $booking->save();
 
+        // Display previous view
         return back()->with('success', 'Booking approved successfully.');
     }
 
+    /**
+     * Reject booking request
+     */
     public function reject($id)
     {
+        // Get designated booking
         $booking = RoomBooking::findOrFail($id);
 
+        // Change status to rejected
         $booking->status = 'rejected';
         $booking->save();
 
+        // Display previous view
         return back()->with('success', 'Booking rejected successfully.');
     }
 
+    /**
+     * Export to PDF
+     */
     public function exportPdf()
     {
+        // Get all bookings
         $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
             ->latest()
             ->get();
 
         $pdf = Pdf::loadView('admin.exports.bookings-pdf', compact('bookings'));
 
+        // Download pdf
         return $pdf->download('bookings-report.pdf');
     }
 }

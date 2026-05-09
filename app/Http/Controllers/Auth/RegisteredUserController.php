@@ -30,6 +30,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validate input data
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone_number' => ['sometimes', 'regex:/^[0-9]+$/', 'min:9', 'max:13'],
@@ -44,6 +45,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Create data on database
         $user = User::create([
             'name' => $request->name,
             'phone_number' => '+62' . $request->phone_number,
@@ -55,10 +57,11 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Create session and login as user with logged in credentials
         Auth::login($user);
-
         $request->session()->regenerate();
 
+        // Display dashboard
         return redirect(route('dashboard', absolute: false));
     }
 }

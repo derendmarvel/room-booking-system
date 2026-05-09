@@ -12,6 +12,7 @@ class EquipmentController extends Controller
      */
     public function create()
     {
+        // Display create equipment form
         return view('admin.equipments.create');
     }
 
@@ -20,6 +21,7 @@ class EquipmentController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate input data
         $validated = $request->validate([
             'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
@@ -27,18 +29,12 @@ class EquipmentController extends Controller
             'category' => 'required|in:audio,video,accessory,computer,networking',
         ]);
 
+        // Create data on database
         Equipment::create($validated);
 
+        // Display admin dashboard
         return redirect()->route('admin.dashboard')
                          ->with('success', 'Equipment created successfully.');
-    }
-
-    /**
-     * Display single equipment.
-     */
-    public function show(Equipment $equipment)
-    {
-        return view('equipments.show', compact('equipment'));
     }
 
     /**
@@ -46,6 +42,7 @@ class EquipmentController extends Controller
      */
     public function edit(Equipment $equipment)
     {
+        // Display edit equipment form
         return view('admin.equipments.edit', compact('equipment'));
     }
 
@@ -54,6 +51,7 @@ class EquipmentController extends Controller
      */
     public function update(Request $request, Equipment $equipment)
     {
+        // Validate input data
         $validated = $request->validate([
             'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
@@ -61,8 +59,10 @@ class EquipmentController extends Controller
             'category' => 'required|in:audio,video,accessory,computer,networking',
         ]);
 
+        // Update data
         $equipment->update($validated);
 
+        // Display admin dashboard
         return redirect()->route('admin.dashboard')
                          ->with('success', 'Equipment updated successfully.');
     }
@@ -72,8 +72,10 @@ class EquipmentController extends Controller
      */
     public function destroy(Equipment $equipment)
     {
+        // Delete data
         $equipment->delete();
 
+        // Display admin dashboard
         return redirect()->route('admin.dashboard')
                          ->with('success', 'Equipment deleted successfully.');
     }

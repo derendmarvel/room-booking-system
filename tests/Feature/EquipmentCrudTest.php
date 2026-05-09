@@ -22,10 +22,11 @@ class EquipmentCrudTest extends TestCase
     {
         $admin = $this->admin();
 
-        $response = $this->actingAs($admin)->post('/equipment', [
+        $response = $this->actingAs($admin)->post('/admin/equipments', [
+            'code' => 'EQ123',
             'name' => 'Projector',
             'stock' => 10,
-            'description' => 'HD Projector',
+            'category' => 'video',
         ]);
 
         $response->assertRedirect();
@@ -41,10 +42,11 @@ class EquipmentCrudTest extends TestCase
 
         $equipment = Equipment::factory()->create();
 
-        $response = $this->actingAs($admin)->put("/equipment/{$equipment->id}", [
+        $response = $this->actingAs($admin)->put("/admin/equipments/{$equipment->id}", [
+            'code' => 'EQ125',
             'name' => 'Updated Projector',
             'stock' => 20,
-            'description' => 'Updated desc',
+            'category' => 'networking',
         ]);
 
         $response->assertRedirect();
@@ -61,7 +63,7 @@ class EquipmentCrudTest extends TestCase
 
         $equipment = Equipment::factory()->create();
 
-        $response = $this->actingAs($admin)->delete("/equipment/{$equipment->id}");
+        $response = $this->actingAs($admin)->delete("/admin/equipments/{$equipment->id}");
 
         $response->assertRedirect();
 
@@ -74,8 +76,8 @@ class EquipmentCrudTest extends TestCase
     {
         $equipment = Equipment::factory()->create();
 
-        $this->post('/equipment', [])->assertRedirect('/login');
-        $this->put("/equipment/{$equipment->id}", [])->assertRedirect('/login');
-        $this->delete("/equipment/{$equipment->id}")->assertRedirect('/login');
+        $this->post('/admin/equipments', [])->assertRedirect('/login');
+        $this->put("/admin/equipments/{$equipment->id}", [])->assertRedirect('/login');
+        $this->delete("/admin/equipments/{$equipment->id}")->assertRedirect('/login');
     }
 }

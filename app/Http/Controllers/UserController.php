@@ -13,10 +13,12 @@ class UserController extends Controller
      */    
     public function index()
     {
+        // Get all users (lecturers and students)
         $users = User::where('role', '!=', 'admin')
             ->latest()
             ->get();
 
+        // Displa
         return view('admin.users.index', compact('users'));
     }
 
@@ -25,6 +27,7 @@ class UserController extends Controller
      */
     public function create()
     {
+        // Display create user form
         return view('admin.users.create');
     }
 
@@ -33,6 +36,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate input data
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -42,6 +46,7 @@ class UserController extends Controller
             'password' => 'required|min:6',
         ]);
 
+        // Add user data into database
         User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -51,7 +56,8 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('users.index')
+        // Display admin dashboard
+        return redirect()->route('admin.dashboard')
             ->with('success', 'User created successfully.');
     }
 
@@ -60,8 +66,10 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
+        // Get designated user
         $user = User::findOrFail($id);
 
+        // Display edit user form
         return view('admin.users.edit', compact('user'));
     }
 
@@ -70,16 +78,19 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Get designated user
         $user = User::findOrFail($id);
 
+        // Validate input data
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'phone_number' => 'sometimes|string',
             'identity_number' => 'sometimes|string',
-            'role' => 'required|in:mahasiswa,dosen',
+            'role' => 'required|in:student,lecturer',
         ]);
 
+        // Update user data into database
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -88,7 +99,8 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
-        return redirect()->route('users.index')
+        // Display admin dashboard
+        return redirect()->route('admin.dashboard')
             ->with('success', 'User updated successfully.');
     }
 
@@ -97,15 +109,18 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
+        // Get designated user
         $user = User::findOrFail($id);
 
-        // safety: prevent deleting admins accidentally
+        // Prevent deleting admins accidentally
         if ($user->role === 'admin') {
             return back()->withErrors('Cannot delete admin user.');
         }
 
+        // Delete user data from database
         $user->delete();
 
+        // Display previous page
         return back()->with('success', 'User deleted successfully.');
     }
 }

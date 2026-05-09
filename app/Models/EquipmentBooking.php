@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EquipmentBooking extends Model
 {
+    // Attributes
     protected $fillable = [
         'room_booking_id',
         'equipment_id',
