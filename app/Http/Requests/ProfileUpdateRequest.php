@@ -23,7 +23,6 @@ class ProfileUpdateRequest extends FormRequest
                 'sometimes',
                 'string',
                 'max:14',
-                'unique:users'
             ],
             'role' => ['required', 'in:student,lecturer'],
             'email' => [

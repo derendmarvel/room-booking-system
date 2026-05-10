@@ -64,7 +64,7 @@
 
         <!-- Role -->
         <div class="mt-4">
-            <x-input-label for="role" :value="__('Student or Lecturer')" />
+            <x-input-label for="role" :value="__('Role')" />
 
             <select
                 id="role"
@@ -72,6 +72,8 @@
                 class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 required
             >
+
+                {{-- Always available roles --}}
                 <option value="student" {{ old('role', $user->role) == 'student' ? 'selected' : '' }}>
                     Student
                 </option>
@@ -79,7 +81,16 @@
                 <option value="lecturer" {{ old('role', $user->role) == 'lecturer' ? 'selected' : '' }}>
                     Lecturer
                 </option>
+
+                {{-- Only admins can assign admin role --}}
+                @if(Auth::user()->role === 'admin')
+                    <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>
+                        Admin
+                    </option>
+                @endif
+
             </select>
+
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
         </div>
 

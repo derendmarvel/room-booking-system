@@ -183,36 +183,45 @@
                     @if($users->count() > 0)
                         <table class="w-full border-collapse">
                             <thead>
-                                <tr class="border-b">
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Identity</th>
-                                    <th>Role</th>
-                                    <th class="text-right">Actions</th>
+                                <tr class="border-b border-gray-300 dark:border-gray-700">
+                                    <th class="text-left py-3">Name</th>
+                                    <th class="text-left py-3">Email</th>
+                                    <th class="text-left py-3">Phone</th>
+                                    <th class="text-left py-3">Identity</th>
+                                    <th class="text-left py-3">Role</th>
+                                    <th class="text-right py-3">Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody>
                                 @foreach($users as $user)
-                                <tr class="border-b">
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->phone_number }}</td>
-                                    <td>{{ $user->identity_number }}</td>
-                                    <td class="capitalize">{{ $user->role }}</td>
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
 
-                                    <td class="text-right">
-                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="bg-yellow-500 px-3 py-1 rounded text-white">Edit</a>
+                                    <td class="py-3">{{ $user->name }}</td>
+                                    <td class="py-3">{{ $user->email }}</td>
+                                    <td class="py-3">{{ $user->phone_number }}</td>
+                                    <td class="py-3">{{ $user->identity_number }}</td>
+                                    <td class="py-3 capitalize">{{ $user->role }}</td>
 
-                                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 px-3 py-1 rounded text-white">
-                                                Delete
-                                            </button>
-                                        </form>
+                                    <td class="py-3 text-right">
+                                        <div class="flex justify-end gap-2">
+
+                                            <a href="{{ route('admin.users.edit', $user->id) }}"
+                                            class="bg-yellow-500 px-3 py-1 rounded text-white">
+                                                Edit
+                                            </a>
+
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 px-3 py-1 rounded text-white">
+                                                    Delete
+                                                </button>
+                                            </form>
+
+                                        </div>
                                     </td>
+
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -245,10 +254,10 @@
                         <table class="w-full">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Building</th>
-                                    <th>Capacity</th>
-                                    <th>Floor</th>
+                                    <th class="text-left">Name</th>
+                                    <th class="text-left">Building</th>
+                                    <th class="text-left">Capacity</th>
+                                    <th class="text-left">Floor</th>
                                     <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -261,14 +270,23 @@
                                     <td>{{ $room->capacity }}</td>
                                     <td>{{ $room->floor }}</td>
 
-                                    <td class="text-right">
-                                        <a href="{{ route('admin.rooms.edit', $room->id) }}" class="bg-yellow-500 px-3 py-1 rounded text-white">Edit</a>
+                                    <td class="text-right py-3">
+                                        <div class="flex justify-end gap-2">
 
-                                        <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 px-3 py-1 rounded text-white">Delete</button>
-                                        </form>
+                                            <a href="{{ route('admin.rooms.edit', $room->id) }}"
+                                            class="bg-yellow-500 px-3 py-1 rounded text-white">
+                                                Edit
+                                            </a>
+
+                                            <form action="{{ route('admin.rooms.destroy', $room->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 px-3 py-1 rounded text-white">
+                                                    Delete
+                                                </button>
+                                            </form>
+
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -302,10 +320,10 @@
                         <table class="w-full">
                             <thead>
                                 <tr>
-                                    <th>Code</th>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Stock</th>
+                                    <th class="text-left">Code</th>
+                                    <th class="text-left">Name</th>
+                                    <th class="text-left">Category</th>
+                                    <th class="text-left">Stock</th>
                                     <th class="text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -318,14 +336,23 @@
                                     <td class="capitalize">{{ $item->category }}</td>
                                     <td>{{ $item->stock }}</td>
 
-                                    <td class="text-right">
-                                        <a href="{{ route('admin.equipments.edit', $item->id) }}" class="bg-yellow-500 px-3 py-1 rounded text-white">Edit</a>
+                                    <td class="text-right py-3">
+                                        <div class="flex justify-end gap-2">
 
-                                        <form action="{{ route('admin.equipments.destroy', $item->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 px-3 py-1 rounded text-white">Delete</button>
-                                        </form>
+                                            <a href="{{ route('admin.equipments.edit', $item->id) }}"
+                                            class="bg-yellow-500 px-3 py-1 rounded text-white">
+                                                Edit
+                                            </a>
+
+                                            <form action="{{ route('admin.equipments.destroy', $item->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 px-3 py-1 rounded text-white">
+                                                    Delete
+                                                </button>
+                                            </form>
+
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach

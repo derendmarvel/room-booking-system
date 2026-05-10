@@ -87,7 +87,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'phone_number' => 'sometimes|regex:/^[0-9]+$/|min:9|max:13',
-            'identity_number' =>'sometimes|string|max:16|unique:users',
+            'identity_number' =>'sometimes|string|max:16',
             'role' => 'required|in:student,lecturer',
         ]);
 
