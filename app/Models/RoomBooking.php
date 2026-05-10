@@ -34,7 +34,7 @@ class RoomBooking extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Each room can be found in many equipmentBookings
+    // Each room booking can be found in many equipmentBookings
     public function equipmentBookings()
     {
         return $this->hasMany(EquipmentBooking::class);

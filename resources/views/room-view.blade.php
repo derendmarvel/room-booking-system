@@ -21,6 +21,7 @@
                     <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                         Rooms
                     </h3>
+                    {{ $rooms->links() }}
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
                             <thead>

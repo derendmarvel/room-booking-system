@@ -110,6 +110,8 @@
                             <input type="number"
                                 name="equipments[0][quantity]"
                                 min="1"
+                                required
+                                disabled
                                 placeholder="Qty"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                         </div>

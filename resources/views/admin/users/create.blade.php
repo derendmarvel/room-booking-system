@@ -96,16 +96,12 @@
                         Select Role
                     </option>
 
-                    <option value="mahasiswa" {{ old('role') == 'mahasiswa' ? 'selected' : '' }}>
-                        Mahasiswa
+                    <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>
+                        Student
                     </option>
 
-                    <option value="dosen" {{ old('role') == 'dosen' ? 'selected' : '' }}>
-                        Dosen
-                    </option>
-
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>
-                        Admin
+                    <option value="lecturer" {{ old('role') == 'lecturer' ? 'selected' : '' }}>
+                        Lecturer
                     </option>
 
                 </select>

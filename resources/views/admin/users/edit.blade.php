@@ -93,19 +93,14 @@
                         class="block mt-1 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                         required>
 
-                    <option value="mahasiswa"
-                        {{ old('role', $user->role) == 'mahasiswa' ? 'selected' : '' }}>
-                        Mahasiswa
+                    <option value="student"
+                        {{ old('role', $user->role) == 'student' ? 'selected' : '' }}>
+                        Student
                     </option>
 
-                    <option value="dosen"
-                        {{ old('role', $user->role) == 'dosen' ? 'selected' : '' }}>
-                        Dosen
-                    </option>
-
-                    <option value="admin"
-                        {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>
-                        Admin
+                    <option value="lecturer"
+                        {{ old('role', $user->role) == 'lecturer' ? 'selected' : '' }}>
+                        Lecturer
                     </option>
 
                 </select>

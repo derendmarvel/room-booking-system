@@ -63,16 +63,18 @@ class RoomBookingController extends Controller
 
         // Get all room bookings, ordered by date and time (descending)
         $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
-            ->orderBy('usage_date', 'desc')
+            ->orderBy('booking_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->paginate(10, ['*'], 'bookings_page');
 
         // Get all users
         $users = User::where('role', '!=', 'admin')
+            ->latest()
             ->paginate(10, ['*'], 'users_page');
 
         // Get all rooms
         $rooms = Room::latest()
+            ->latest()
             ->paginate(10, ['*'], 'rooms_page');
 
         // Get all equipments
@@ -217,14 +219,20 @@ class RoomBookingController extends Controller
      */
     public function approve($id)
     {
-        // Get designated booking
-        $booking = RoomBooking::findOrFail($id);
+        $booking = RoomBooking::with('equipmentBookings')->findOrFail($id);
 
-        // Change status to approved
         $booking->status = 'approved';
+
+        $conflict = $this->hasEquipmentConflict($booking);
+
+        if ($conflict) {
+            return back()->withErrors([
+                'error' => "Cannot approve booking. '{$conflict}' exceeds available stock for this time slot."
+            ]);
+        }
+
         $booking->save();
 
-        // Display previous view
         return back()->with('success', 'Booking approved successfully.');
     }
 
@@ -242,6 +250,47 @@ class RoomBookingController extends Controller
 
         // Display previous view
         return back()->with('success', 'Booking rejected successfully.');
+    }
+
+    private function hasEquipmentConflict($booking)
+    {
+        foreach ($booking->equipmentBookings as $item) {
+
+            $equipmentId = $item->equipment_id;
+            $requestedQty = $item->quantity;
+
+            $start = $booking->start_time;
+            $end = $booking->end_time;
+            $date = $booking->usage_date;
+
+            // Get ALL approved bookings that overlap
+            $overlappingBookings = RoomBooking::where('status', 'approved')
+                ->where('usage_date', $date)
+                ->where(function ($q) use ($start, $end) {
+                    $q->where('start_time', '<', $end)
+                    ->where('end_time', '>', $start);
+                })
+                ->with('equipmentBookings')
+                ->get();
+
+            $usedQty = 0;
+
+            foreach ($overlappingBookings as $b) {
+                foreach ($b->equipmentBookings as $eb) {
+                    if ($eb->equipment_id == $equipmentId) {
+                        $usedQty += $eb->quantity;
+                    }
+                }
+            }
+
+            $equipment = Equipment::find($equipmentId);
+
+            if ($usedQty + $requestedQty > $equipment->stock) {
+                return $equipment->name;
+            }
+        }
+
+        return false;
     }
 
     /**

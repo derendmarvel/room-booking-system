@@ -13,17 +13,14 @@ class EquipmentBooking extends Model
         'quantity'
     ];
 
-    /**
-     * Each equipment booking belongs to one room booking
-     */
+    
+    // Each equipment booking belongs to one room booking
     public function roomBooking()
     {
         return $this->belongsTo(RoomBooking::class);
     }
 
-    /**
-     * Each equipment booking refers to one equipment/tool
-     */
+    //Each equipment booking refers to one equipment/tool
     public function equipment()
     {
         return $this->belongsTo(Equipment::class);

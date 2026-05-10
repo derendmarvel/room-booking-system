@@ -7,7 +7,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
+            @if($errors->any())
+                <div class="bg-red-200 text-red-800 p-3 rounded mb-4">
+                    {{ $errors->first() }}
+                </div>
+            @endif
             <!-- Booking List -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
@@ -30,10 +34,7 @@
                                             Room
                                         </th>
                                         <th class="text-left py-3">
-                                            Date
-                                        </th>
-                                        <th class="text-left py-3">
-                                            Time
+                                            Schedule
                                         </th>
                                         <th class="text-left py-3">
                                             Equipments
@@ -63,12 +64,15 @@
                                                 {{ $booking->room->name }}
                                             </td>
                                             <td class="py-3">
-                                                {{ $booking->usage_date }}
-                                            </td>
-                                            <td class="py-3">
-                                                {{ $booking->start_time }}
-                                                -
-                                                {{ $booking->end_time }}
+                                                <div class="flex flex-col">
+                                                    <span class="font-semibold">
+                                                        {{ $booking->usage_date }}
+                                                    </span>
+
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                        {{ $booking->start_time }} - {{ $booking->end_time }}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td class="py-3">
                                                 @if($booking->equipmentBookings->count() > 0)
@@ -205,6 +209,14 @@
                                         </th>
 
                                         <th class="text-left py-3">
+                                            Phone Number
+                                        </th>
+
+                                        <th class="text-left py-3">
+                                            Identity Number
+                                        </th>
+
+                                        <th class="text-left py-3">
                                             Role
                                         </th>
 
@@ -225,6 +237,14 @@
 
                                             <td class="py-3">
                                                 {{ $user->email }}
+                                            </td>
+
+                                             <td class="py-3">
+                                                {{ $user->phone_number }}
+                                            </td>
+
+                                             <td class="py-3">
+                                                {{ $user->identity_number }}
                                             </td>
 
                                             <td class="py-3 capitalize">

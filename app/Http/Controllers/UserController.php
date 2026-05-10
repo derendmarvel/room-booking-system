@@ -40,8 +40,9 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone_number' => 'nullable|string',
             'identity_number' => 'nullable|string',
+            'phone_number' => 'sometimes|regex:/^[0-9]+$/|min:9|max:13',
+            'identity_number' =>'sometimes|string|max:16|unique:users',
             'role' => 'required|in:student,lecturer',
             'password' => 'required|min:6',
         ]);
@@ -85,8 +86,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'phone_number' => 'sometimes|string',
-            'identity_number' => 'sometimes|string',
+            'phone_number' => 'sometimes|regex:/^[0-9]+$/|min:9|max:13',
+            'identity_number' =>'sometimes|string|max:16|unique:users',
             'role' => 'required|in:student,lecturer',
         ]);
 

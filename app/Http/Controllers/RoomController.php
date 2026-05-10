@@ -13,7 +13,7 @@ class RoomController extends Controller
     public function view()
     {
         // Get all rooms
-        $rooms = Room::all();
+        $rooms = Room::paginate(10);
 
         // Display all rooms
         return view('room-view', compact('rooms'));
@@ -37,8 +37,8 @@ class RoomController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'building' => 'required|string|max:255',
-            'floor' => 'required|integer',
-            'capacity' => 'required|integer',
+            'floor' => 'required|integer|min:1',
+            'capacity' => 'required|integer|min:1',
         ]);
 
         // Create data in database
