@@ -6,10 +6,32 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * ==========================================================
+ * USER CRUD FEATURE TEST
+ * ==========================================================
+ * This test class verifies the functionality of
+ * User Management (CRUD) in the system.
+ *
+ * Features tested:
+ * - Admin can create user
+ * - Admin can update user
+ * - Admin can delete user
+ * - Guest (unauthenticated user) cannot access CRUD
+ *
+ * These tests ensure role-based access control is working
+ * properly in the application.
+ * ==========================================================
+ */
 class UserCrudTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Create an admin user for testing authorization.
+     * 
+     * @return \App\Models\User
+     */
     private function admin()
     {
         return User::factory()->create([
@@ -17,6 +39,17 @@ class UserCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN CREATE USER
+     * ==========================================================
+     * Scenario:
+     * - Admin submits a request to create a new user
+     *
+     * Expected:
+     * - User is created in database
+     * - System redirects to admin dashboard
+     */
     public function test_admin_can_create_user()
     {
         $admin = $this->admin();
@@ -38,6 +71,17 @@ class UserCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN UPDATE USER
+     * ==========================================================
+     * Scenario:
+     * - Admin updates existing user data
+     *
+     * Expected:
+     * - User data is updated in database
+     * - System redirects to admin dashboard
+     */
     public function test_admin_can_update_user()
     {
         $admin = $this->admin();
@@ -59,6 +103,17 @@ class UserCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN DELETE USER
+     * ==========================================================
+     * Scenario:
+     * - Admin deletes an existing user
+     *
+     * Expected:
+     * - User is removed from database
+     * - System redirects back
+     */
     public function test_admin_can_delete_user()
     {
         $admin = $this->admin();
@@ -73,6 +128,16 @@ class UserCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: GUEST CANNOT ACCESS USER CRUD
+     * ==========================================================
+     * Scenario:
+     * - Unauthenticated user tries to access admin routes
+     *
+     * Expected:
+     * - User is redirected to login page
+     */
     public function test_guest_cannot_access_user_crud()
     {
         $user = User::factory()->create();

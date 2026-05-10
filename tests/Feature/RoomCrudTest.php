@@ -7,10 +7,32 @@ use App\Models\Room;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * ==========================================================
+ * ROOM CRUD FEATURE TEST
+ * ==========================================================
+ * This test class verifies the functionality of Room
+ * management in the system (Admin only access).
+ *
+ * Features tested:
+ * - Admin can create room
+ * - Admin can update room
+ * - Admin can delete room
+ * - Guest cannot access room CRUD routes
+ *
+ * This ensures role-based access control is enforced
+ * correctly for room management functionality.
+ * ==========================================================
+ */
 class RoomCrudTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Create admin user for testing authorization.
+     *
+     * @return \App\Models\User
+     */
     private function admin()
     {
         return User::factory()->create([
@@ -18,6 +40,17 @@ class RoomCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN CREATE ROOM
+     * ==========================================================
+     * Scenario:
+     * - Admin submits request to create a new room
+     *
+     * Expected:
+     * - Room is stored in database
+     * - System redirects after successful creation
+     */
     public function test_admin_can_create_room()
     {
         $admin = $this->admin();
@@ -37,6 +70,17 @@ class RoomCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN UPDATE ROOM
+     * ==========================================================
+     * Scenario:
+     * - Admin updates existing room data
+     *
+     * Expected:
+     * - Room data is updated in database
+     * - System redirects after update
+     */
     public function test_admin_can_update_room()
     {
         $admin = $this->admin();
@@ -58,6 +102,17 @@ class RoomCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: ADMIN CAN DELETE ROOM
+     * ==========================================================
+     * Scenario:
+     * - Admin deletes an existing room
+     *
+     * Expected:
+     * - Room is removed from database
+     * - System redirects after deletion
+     */
     public function test_admin_can_delete_room()
     {
         $admin = $this->admin();
@@ -73,6 +128,16 @@ class RoomCrudTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: GUEST CANNOT ACCESS ROOM CRUD
+     * ==========================================================
+     * Scenario:
+     * - Unauthenticated user tries to access admin room routes
+     *
+     * Expected:
+     * - User is redirected to login page
+     */
     public function test_guest_cannot_access_room_crud()
     {
         $room = Room::factory()->create();

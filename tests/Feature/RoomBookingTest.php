@@ -3,19 +3,36 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Equipment;
 use App\Models\RoomBooking;
 
+/**
+ * ==========================================================
+ * ROOM BOOKING FEATURE TEST
+ * ==========================================================
+ * This test class validates the room booking functionality
+ * of the system.
+ *
+ * Features tested:
+ * - Required field validation
+ * - Time validation (end_time > start_time)
+ * - Equipment stock validation
+ * - Successful booking creation
+ * - Basic route accessibility
+ *
+ * This ensures that booking logic, validation rules,
+ * and database persistence work correctly.
+ * ==========================================================
+ */
 class RoomBookingTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     /**
-     * A basic feature test example.
+     * Basic route test to ensure application is running.
      */
     public function test_example(): void
     {
@@ -24,22 +41,33 @@ class RoomBookingTest extends TestCase
         $response->assertStatus(200);
     }
 
+    /**
+     * Create a standard authenticated user (student role)
+     * used for booking tests.
+     */
     private function actingUser()
     {
-        // Explicitly defining role and a valid phone number 
-        // to ensure it passes all internal validations
         return User::factory()->create([
             'role' => 'student',
-            'phone_number' => '8123456789', 
-            'identity_number' => '1231456789', 
+            'phone_number' => '8123456789',
+            'identity_number' => '1231456789',
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: BOOKING REQUIRES REQUIRED FIELDS
+     * ==========================================================
+     * Scenario:
+     * - User submits empty booking form
+     *
+     * Expected:
+     * - Validation errors for required fields
+     */
     public function test_booking_requires_required_fields()
     {
         $user = $this->actingUser();
 
-        // Changed from '/bookings' to route('bookings.store') -> '/book-room'
         $response = $this->actingAs($user)
             ->post(route('bookings.store'), []);
 
@@ -52,6 +80,16 @@ class RoomBookingTest extends TestCase
         ]);
     }
 
+    /**
+     * ==========================================================
+     * TEST: END TIME MUST BE AFTER START TIME
+     * ==========================================================
+     * Scenario:
+     * - User submits invalid time range
+     *
+     * Expected:
+     * - Validation error on end_time field
+     */
     public function test_end_time_must_be_after_start_time()
     {
         $user = $this->actingUser();
@@ -62,13 +100,23 @@ class RoomBookingTest extends TestCase
                 'room_id' => $room->id,
                 'usage_date' => now()->addDay()->toDateString(),
                 'start_time' => '14:00',
-                'end_time' => '12:00', // invalid
+                'end_time' => '12:00',
                 'purpose' => 'Test',
             ]);
 
         $response->assertSessionHasErrors(['end_time']);
     }
 
+    /**
+     * ==========================================================
+     * TEST: CANNOT BOOK MORE THAN EQUIPMENT STOCK
+     * ==========================================================
+     * Scenario:
+     * - User requests equipment quantity exceeding stock
+     *
+     * Expected:
+     * - Validation error returned
+     */
     public function test_cannot_book_more_than_available_equipment_stock()
     {
         $user = $this->actingUser();
@@ -86,7 +134,6 @@ class RoomBookingTest extends TestCase
                 'start_time' => '10:00',
                 'end_time' => '12:00',
                 'purpose' => 'Test booking',
-
                 'equipments' => [
                     [
                         'equipment_id' => $equipment->id,
@@ -98,6 +145,17 @@ class RoomBookingTest extends TestCase
         $response->assertSessionHasErrors();
     }
 
+    /**
+     * ==========================================================
+     * TEST: VALID BOOKING IS CREATED
+     * ==========================================================
+     * Scenario:
+     * - User submits valid booking request
+     *
+     * Expected:
+     * - Booking is stored in database
+     * - User is redirected to dashboard
+     */
     public function test_valid_booking_is_created()
     {
         $user = $this->actingUser();
@@ -115,7 +173,6 @@ class RoomBookingTest extends TestCase
                 'start_time' => '10:00',
                 'end_time' => '12:00',
                 'purpose' => 'Valid booking',
-
                 'equipments' => [
                     [
                         'equipment_id' => $equipment->id,
