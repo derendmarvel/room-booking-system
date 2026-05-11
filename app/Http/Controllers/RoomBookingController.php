@@ -63,8 +63,7 @@ class RoomBookingController extends Controller
 
         // Get all room bookings, ordered by date and time (descending)
         $bookings = RoomBooking::with(['room', 'equipmentBookings.equipment', 'user'])
-            ->orderBy('booking_date', 'desc')
-            ->orderBy('start_time', 'desc')
+            ->latest()
             ->paginate(10, ['*'], 'bookings_page');
 
         // Get all users
@@ -221,8 +220,35 @@ class RoomBookingController extends Controller
     {
         $booking = RoomBooking::with('equipmentBookings')->findOrFail($id);
 
-        $booking->status = 'approved';
+        /*
+        |--------------------------------------------------------------------------
+        | ROOM CONFLICT CHECK
+        |--------------------------------------------------------------------------
+        | Prevent approving if another approved booking already exists
+        | for the same room, date, and overlapping time.
+        */
+        $roomConflict = RoomBooking::where('id', '!=', $booking->id)
+            ->where('room_id', $booking->room_id)
+            ->where('usage_date', $booking->usage_date)
+            ->where('status', 'approved')
+            ->where(function ($query) use ($booking) {
 
+                $query->where('start_time', '<', $booking->end_time)
+                    ->where('end_time', '>', $booking->start_time);
+            })
+            ->exists();
+
+        if ($roomConflict) {
+            return back()->withErrors([
+                'error' => 'Cannot approve booking. Room has already been booked for this time slot.'
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | EQUIPMENT CONFLICT CHECK
+        |--------------------------------------------------------------------------
+        */
         $conflict = $this->hasEquipmentConflict($booking);
 
         if ($conflict) {
@@ -231,6 +257,12 @@ class RoomBookingController extends Controller
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | APPROVE BOOKING
+        |--------------------------------------------------------------------------
+        */
+        $booking->status = 'approved';
         $booking->save();
 
         return back()->with('success', 'Booking approved successfully.');

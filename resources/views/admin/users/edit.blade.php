@@ -59,14 +59,23 @@
             </div>
 
             {{-- Phone Number --}}
-            <div>
-                <x-input-label for="phone_number" :value="__('Phone Number')" />
+            <div class="mt-4">
+            <x-input-label for="phone_number" :value="__('Phone Number')" />
+                <div class="flex mt-1">
+                    
+                    <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-white text-gray-500 sm:text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400">
+                        +62
+                    </span>
 
-                <x-text-input id="phone_number"
-                              class="block mt-1 w-full"
-                              type="text"
-                              name="phone_number"
-                              :value="old('phone_number', $user->phone_number)" />
+                    <x-text-input
+                        id="phone_number"
+                        class="block w-full rounded-l-none"
+                        type="text"
+                        name="phone_number"
+                        :value="old('phone_number', ltrim(str_replace('+62', '', $user->phone_number), '0'))"
+                        required
+                    />
+                </div>
 
                 <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
             </div>

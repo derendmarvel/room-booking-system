@@ -247,19 +247,32 @@
 
                 selectable: true,
 
+                selectAllow: function(selectInfo) {
+
+                    const now = new Date();
+
+                    // optional buffer:
+                    // blocks bookings that end within the next 1 hour
+                    const bufferHours = 1;
+
+                    const blockedTime = new Date(
+                        now.getTime() + (bufferHours * 60 * 60 * 1000)
+                    );
+
+                    // disallow selecting past/near-past slots
+                    return selectInfo.end > blockedTime;
+                },
+
                 editable: true,
 
                 selectMirror: true,
 
                 slotDuration: '01:00:00',
 
-                // ADD THIS
                 slotLabelInterval: '01:00',
 
-                // ADD THIS
                 expandRows: true,
 
-                // ADD THIS
                 contentHeight: 750,
 
                 headerToolbar: {

@@ -40,9 +40,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'identity_number' => 'nullable|string',
+            'identity_number' => 'sometimes|string|max:16',
             'phone_number' => 'sometimes|regex:/^[0-9]+$/|min:9|max:13',
-            'identity_number' =>'sometimes|string|max:16|unique:users',
             'role' => 'required|in:student,lecturer',
             'password' => 'required|min:6',
         ]);
@@ -51,7 +50,7 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone_number' => $request->phone_number,
+            'phone_number' => '+62' . $request->phone_number,
             'identity_number' => $request->identity_number,
             'role' => $request->role,
             'password' => Hash::make($request->password),
@@ -95,7 +94,7 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
-            'phone_number' => $request->phone_number,
+            'phone_number' => '+62' . $request->phone_number,
             'identity_number' => $request->identity_number,
             'role' => $request->role,
         ]);
